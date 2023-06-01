@@ -454,6 +454,7 @@ int logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     }
     return 0;
 }
+
 //
 //選擇要玩的遊戲
 int drawArcadeMenu()
@@ -465,7 +466,7 @@ int drawArcadeMenu()
     printf("==================================\n");
     printf("輸入想玩啥?\n");
     int n = 1;
-    scanf("%d", &n); 
+    scanf("%d", &n);
     if (n == 0)exit(0);
     Sleep(1000);
     return n;
@@ -504,7 +505,7 @@ void print_gaming(char array[9], int meo[9]) {
         printf("\033[0m");
     }
 }
-int edge_wrong(int x) {
+int edge_wrong_byOOXX(int x) {
     if (x < 0 || x>8) {
         printf("You exceed the edge please try again!!!\n");
         return 0;
@@ -525,7 +526,7 @@ int OOXX() {
         while (!jg_win(array)) {
             int x;
             scanf("\n%d", &x);
-            if (edge_wrong(x)){
+            if (edge_wrong_byOOXX) {
                 if (n % 2 == 0)array[x] = 'o';
                 else if (n % 2 == 1)array[x] = 'x';
                 meo[x] = 1;
@@ -541,9 +542,17 @@ int OOXX() {
     }
     return 0;
 }
+//內部機器設定
+int edge_bymachine(int x) {
+    if (x != 0 && x != 1) {
+        printf("您輸入的未在要求內喔!!\n");
+        return -1;
+    }
+    return 1;
+}
 int main()
-{  
-    int want_to_play = 1;
+{
+    int want_to_play = 2;
     while (want_to_play) {
         system("cls");
         int n = drawArcadeMenu();
@@ -582,16 +591,13 @@ int main()
 
             while (1)
             {
-                logic(canvas, &state);
+                int judge_over = logic(canvas, &state);
                 printCanvas(canvas, &state);
                 printf("\n\n\n\n\n\n\n\n\n\n\n\Your score:%d", state.score);
+                printf("\nESC can leave the gaming if you don't want to play!");
                 Sleep(100);
-                if (logic(canvas, &state) == -1) {
-                    break;
-                }
+                if (judge_over == -1)break;
             }
         }
-        printf("還要再玩其他遊戲或繼續玩一樣的嗎?");
-        scanf("\n%d",&want_to_play);
     }
 }
