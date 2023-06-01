@@ -460,14 +460,17 @@ int logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
 int drawArcadeMenu()
 {
     printf("========== 街機遊戲選單 ==========\n");
-    printf("1. ooxx\n");
-    printf("2. 俄羅斯方塊\n");
-    printf("0. 可直接退出遊戲\n");
+    printf("= 1. ooxx                        =\n");
+    printf("= 2. 俄羅斯方塊                  =\n");
+    printf("= 0. 可直接退出遊戲              =\n");
     printf("==================================\n");
     printf("輸入想玩啥?\n");
     int n = 1;
     scanf("%d", &n);
-    if (n == 0)exit(0);
+    if (n == 0) {
+        printf("88 see you next time\n");
+        exit(0);
+    }
     Sleep(1000);
     return n;
 }
@@ -508,11 +511,23 @@ void print_gaming(char array[9], int meo[9]) {
 int edge_wrong_byOOXX(int x) {
     if (x < 0 || x>8) {
         printf("You exceed the edge please try again!!!\n");
+        Sleep(500);
         return 0;
     }
     return 1;
 }
-
+int playing_again(int want_to_play) {
+    while (!edge_bymachine(want_to_play)) {
+        for (int i = 0; i <= 4; i++) {
+            printf("\033[K");  // 清除當前行內容
+            printf("\033[1A"); // 將光標向上移動一行
+        }
+        printf("You input is not in edge from 0 to 1\n");
+        printf("Do you wnat to play again??(Yes==1,No==0)\n");
+        scanf("%d", &want_to_play);
+    }
+    return want_to_play;
+}
 int OOXX() {
     char array[9] = { 0 };
     int meo[9] = { 0 };
@@ -526,27 +541,36 @@ int OOXX() {
         while (!jg_win(array)) {
             int x;
             scanf("\n%d", &x);
-            if (edge_wrong_byOOXX) {
-                if (n % 2 == 0)array[x] = 'o';
-                else if (n % 2 == 1)array[x] = 'x';
-                meo[x] = 1;
-                n++;
+            if (edge_wrong_byOOXX(x)) {
+                if (meo[x] == 1) {
+                    printf("This has been set ,you can't not do it again\n");
+                    Sleep(1000);
+                }
+                else {
+                    if (n % 2 == 0)array[x] = 'o';
+                    else if (n % 2 == 1)array[x] = 'x';
+                    meo[x] = 1;
+                    n++;
+                }
             }
-            print_gaming(array, meo);
+            print_gaming(array,meo);
+            if (n == 9)break;
         }
         if (n == 9 && !jg_win(array))printf("平手\n");
         else if (n % 2 == 1)printf("O winner\n");
         else if (n % 1 == 0) printf("x winner\n");
+
         printf("Do you wnat to play again??(Yes==1,No==0)\n");
         scanf("%d", &want_to_play);
+        want_to_play = playing_again(want_to_play);
     }
     return 0;
 }
 //內部機器設定
 int edge_bymachine(int x) {
     if (x != 0 && x != 1) {
-        printf("您輸入的未在要求內喔!!\n");
-        return -1;
+        printf("\n您輸入的未在要求內喔!!\n");
+        return 0;
     }
     return 1;
 }
@@ -595,7 +619,8 @@ int main()
                 printCanvas(canvas, &state);
                 printf("\n\n\n\n\n\n\n\n\n\n\n\Your score:%d", state.score);
                 printf("\nESC can leave the gaming if you don't want to play!");
-                Sleep(100);
+                //更改了這邊的速度快一點
+                Sleep(50);
                 if (judge_over == -1)break;
             }
         }
