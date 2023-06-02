@@ -325,11 +325,11 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
 {
     printf("\033[0;0H\n");
     for (int i = 0; i < CANVAS_HEIGHT; i++) {
-        printf("|");
+        printf("\033[35;1m|\033[0m");
         for (int j = 0; j < CANVAS_WIDTH; j++) {
             printf("\033[%dm\u3000", canvas[i][j].color);
         }
-        printf("\033[0m|\n");
+        printf("\033[0m\033[35;1m|\033[0m\n");
     }
 
     Shape shapeData = shapes[state->queue[1]];
@@ -448,13 +448,26 @@ int logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
             {
                 printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT - 3, CANVAS_WIDTH * 2 + 5, CANVAS_HEIGHT + 5, 0);
-                exit(0);
+                return 10;
             }
         }
     }
     return 0;
 }
-
+//結束畫面
+void showEndScreen() {
+    printf("\n");
+    printf("=========================================\n");
+    for (int i = 0; i < 20; i++)printf("\U0001F48F");
+    printf("\n");
+    printf("             遊戲結束！\n");
+    printf("       感謝使用，再見！\n");
+    for (int i = 0; i < 20; i++)printf("\U0001F48F");
+    printf("\n");
+    printf("=========================================\n");
+    printf("\n");
+    return 1;
+}
 //
 //選擇要玩的遊戲
 int drawArcadeMenu()
@@ -469,6 +482,7 @@ int drawArcadeMenu()
     scanf("%d", &n);
     if (n == 0) {
         printf("88 see you next time\n");
+        showEndScreen();
         exit(0);
     }
     Sleep(1000);
@@ -500,21 +514,28 @@ void print_gaming(char array[9], int meo[9]) {
     system("cls");
     for (int i = 0; i < 9; i++) {
         printf("\033[43;30m");
+        printf("|");
         if (meo[i] != 0)
-            printf("\033[31;1m%c \033[0m", array[i]);
+            printf("\033[31;1m%c\033[0m", array[i]);
         else
-            printf("%d \033[0m", i);
-        if (i % 3 == 2)printf("\n");
+            printf("\033[43m%d", i);
+        if (i % 3 == 2)printf("\033[43;30m|\n");
+        if (i % 3 == 2)printf("\033[0m\033[43;30m-------\n");
         printf("\033[0m");
     }
 }
 int edge_wrong_byOOXX(int x) {
     if (x < 0 || x>8) {
-        printf("You exceed the edge please try again!!!\n");
+        printf("\033[31mYou exceed the edge please try again!!!\033[0m\n");
         Sleep(500);
         return 0;
     }
     return 1;
+}
+void jg_who_win(int n, char array[9]) {
+    if (n == 9 && !jg_win(array))printf("平手\n");
+    else if (n % 2 == 1)printf("O winner\n");
+    else if (n % 1 == 0) printf("x winner\n");
 }
 int playing_again(int want_to_play) {
     while (!edge_bymachine(want_to_play)) {
@@ -522,7 +543,7 @@ int playing_again(int want_to_play) {
             printf("\033[K");  // 清除當前行內容
             printf("\033[1A"); // 將光標向上移動一行
         }
-        printf("You input is not in edge from 0 to 1\n");
+        printf("\033[31mYou input is not in edge from 0 to 1\033[0m\n");
         printf("Do you wnat to play again??(Yes==1,No==0)\n");
         scanf("%d", &want_to_play);
     }
@@ -543,7 +564,7 @@ int OOXX() {
             scanf("\n%d", &x);
             if (edge_wrong_byOOXX(x)) {
                 if (meo[x] == 1) {
-                    printf("This has been set ,you can't not do it again\n");
+                    printf("\033[31;4mThis has been set ,you can't not do it again\033[0m\n");
                     Sleep(1000);
                 }
                 else {
@@ -556,9 +577,7 @@ int OOXX() {
             print_gaming(array,meo);
             if (n == 9)break;
         }
-        if (n == 9 && !jg_win(array))printf("平手\n");
-        else if (n % 2 == 1)printf("O winner\n");
-        else if (n % 1 == 0) printf("x winner\n");
+        jg_who_win(n, array);
 
         printf("Do you wnat to play again??(Yes==1,No==0)\n");
         scanf("%d", &want_to_play);
@@ -569,7 +588,7 @@ int OOXX() {
 //內部機器設定
 int edge_bymachine(int x) {
     if (x != 0 && x != 1) {
-        printf("\n您輸入的未在要求內喔!!\n");
+        printf("\n\033[31m您輸入的未在要求內喔!!\033[0m\n");
         return 0;
     }
     return 1;
@@ -621,8 +640,16 @@ int main()
                 printf("\nESC can leave the gaming if you don't want to play!");
                 //更改了這邊的速度快一點
                 Sleep(50);
-                if (judge_over == -1)break;
+                if (judge_over == -1||judge_over==10)break;
             }
+            Sleep(1000);
+            system("cls");
+            printf("Do you wnat to play ?(Yes==1,No==0)\n");
+            printf("\r\r\033[K");
+            scanf("%d", &want_to_play);
+            want_to_play = playing_again(want_to_play);
+            showEndScreen();
+            Sleep(1000);
         }
     }
 }
