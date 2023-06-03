@@ -485,6 +485,11 @@ int drawArcadeMenu()
         showEndScreen();
         exit(0);
     }
+    else if (n > 9 || n < 0) {
+        printf("請重新輸入\n");
+        Sleep(1000);
+        return 0;
+    }
     Sleep(1000);
     return n;
 }
@@ -589,17 +594,18 @@ int OOXX() {
 int edge_bymachine(int x) {
     if (x != 0 && x != 1) {
         printf("\n\033[31m您輸入的未在要求內喔!!\033[0m\n");
+        system("cls");
+        Sleep(1000);
         return 0;
     }
     return 1;
-}
+} 
 int main()
 {
     int want_to_play = 2;
     while (want_to_play) {
         system("cls");
         int n = drawArcadeMenu();
-        printf("%d\n", n);
         srand((unsigned)time(NULL));
         if (n == 1) {
             system("cls");
@@ -648,7 +654,7 @@ int main()
             printf("\r\r\033[K");
             scanf("%d", &want_to_play);
             want_to_play = playing_again(want_to_play);
-            showEndScreen();
+            if(want_to_play==0)showEndScreen();
             Sleep(1000);
         }
     }
