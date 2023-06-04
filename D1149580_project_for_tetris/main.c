@@ -455,18 +455,63 @@ int logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     return 0;
 }
 //結束畫面
-void showEndScreen() {
+int showEndScreen() {
+    system("cls");
     printf("\n");
     printf("=========================================\n");
     for (int i = 0; i < 20; i++)printf("\U0001F48F");
     printf("\n");
+    printf("\033[92m");
+    printf("\033[5m");
     printf("             遊戲結束！\n");
-    printf("       感謝使用，再見！\n");
+    printf("          感謝使用，再見！\n");
+    printf("\033[0m");
     for (int i = 0; i < 20; i++)printf("\U0001F48F");
     printf("\n");
     printf("=========================================\n");
     printf("\n");
     return 1;
+}
+void printFallingStars() {
+    int width = 40;    // 畫面寬度
+    int height = 10;   // 畫面高度
+    int numStars = 20; // 星星數量
+
+    // 初始化星星位置和速度
+    int positions[20];
+    int speeds[20];
+    for (int i = 0; i < numStars; i++) {
+        positions[i] = rand() % width;       // 隨機設定星星的初始位置
+        speeds[i] = 1 + rand() % 3;          // 隨機設定星星的下降速度
+    }
+
+    system("cls"); // 清空螢幕
+    int ct = 0;
+    while (ct!=80) {
+        ct++;
+        system("cls"); // 清空螢幕
+        printf("\033[94m");
+        // 更新星星位置
+        for (int i = 0; i < numStars; i++) {
+            positions[i] += speeds[i];
+
+            // 檢查是否到達畫面底部
+            if (positions[i] >= height) {
+                positions[i] = rand() % width;  // 隨機設定新的初始位置
+                speeds[i] = 1 + rand() % 3;     // 隨機設定新的速度
+            }
+
+            // 打印星星位置
+            for (int j = 0; j < positions[i]; j++) {
+                printf(" ");
+            }
+            printf("★\n");
+        }
+
+        Sleep(50); // 延遲 100 毫秒
+    }
+    printf("\033[0m");
+    return;
 }
 //
 //選擇要玩的遊戲
@@ -482,6 +527,7 @@ int drawArcadeMenu()
     scanf("%d", &n);
     if (n == 0) {
         printf("88 see you next time\n");
+        printFallingStars();
         showEndScreen();
         exit(0);
     }
@@ -542,6 +588,17 @@ void jg_who_win(int n, char array[9]) {
     else if (n % 2 == 1)printf("O winner\n");
     else if (n % 1 == 0) printf("x winner\n");
 }
+//內部機器設定
+int edge_bymachine(int x) {
+    if (x != 0 && x != 1) {
+        printf("\n\033[31m您輸入的未在要求內喔!!\033[0m\n");
+        system("cls");
+        Sleep(1000);
+        return 0;
+    }
+    return 1;
+}
+//
 int playing_again(int want_to_play) {
     while (!edge_bymachine(want_to_play)) {
         for (int i = 0; i <= 4; i++) {
@@ -550,6 +607,7 @@ int playing_again(int want_to_play) {
         }
         printf("\033[31mYou input is not in edge from 0 to 1\033[0m\n");
         printf("Do you wnat to play again??(Yes==1,No==0)\n");
+        printf("\r");
         scanf("%d", &want_to_play);
     }
     return want_to_play;
@@ -590,16 +648,7 @@ int OOXX() {
     }
     return 0;
 }
-//內部機器設定
-int edge_bymachine(int x) {
-    if (x != 0 && x != 1) {
-        printf("\n\033[31m您輸入的未在要求內喔!!\033[0m\n");
-        system("cls");
-        Sleep(1000);
-        return 0;
-    }
-    return 1;
-} 
+
 int main()
 {
     int want_to_play = 2;
@@ -642,7 +691,7 @@ int main()
             {
                 int judge_over = logic(canvas, &state);
                 printCanvas(canvas, &state);
-                printf("\n\n\n\n\n\n\n\n\n\n\n\Your score:%d", state.score);
+                printf("\n\n\n\n\n\n\n\n\n\n\nYour score:%d", state.score);
                 printf("\nESC can leave the gaming if you don't want to play!");
                 //更改了這邊的速度快一點
                 Sleep(50);
@@ -651,10 +700,16 @@ int main()
             Sleep(1000);
             system("cls");
             printf("Do you wnat to play ?(Yes==1,No==0)\n");
-            printf("\r\r\033[K");
+            printf("\r請在這邊輸入:");
+            printf("\033[2;14H");
             scanf("%d", &want_to_play);
+
             want_to_play = playing_again(want_to_play);
-            if(want_to_play==0)showEndScreen();
+            if (want_to_play == 0) {
+                printFallingStars();
+                Sleep(100);
+                showEndScreen();
+            }
             Sleep(1000);
         }
     }
